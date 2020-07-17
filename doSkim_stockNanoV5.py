@@ -99,7 +99,8 @@ modulesToRun.append(eventCounterHistogramModule())
 # for stock, use regular Pt
 #preselection = "Electron_pt[0] > 35"
 # preselection="Electron_pt[0] > 100"
-preselection="Electron_pt[0] > 45"
+preselection = "( (((((Muon_pt[0])>17)*((Muon_pt[1])>8))+(((Electron_pt[0])>23)*((Electron_pt[1])>12)))>0)*((Jet_pt[0])>17)*((Jet_pt[1])>17) )"
+#preselection="Electron_pt[0] > 45"
 # preselection="Electron_pt[0]>45 || Muon_pt[0]>45 || (Muon_pt[0]>15 && Muon_pt[1]>8 && nJet>2 && Jet_pt[0]>23) || (Electron_pt[0]>17 && Electron_pt[1]>12 && nJet>2 && Jet_pt[0]>23)"
 # remove preselection, as preselection is done in the custom2016SkimModule
 keepAndDrop = "keepAndDrop.txt"
