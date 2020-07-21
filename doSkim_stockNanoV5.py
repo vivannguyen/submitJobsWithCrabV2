@@ -44,6 +44,39 @@ parser.add_argument("-dataRun", "--dataRun", type=str, default="X", help="")
 parser.add_argument(
     "-dataset", "--dataset", type=str, default="/myTestDataset/testSecondary/NANOAODSIM", help=""
 )
+parser.add_argument("-infile" , "--infile" , type=str, default=None  , help="")
+
+args = parser.parse_args()
+
+def inputfile(nanofile):
+   tested   = False
+   forceaaa = False
+   pfn=os.popen("edmFileUtil -d %s"%(nanofile)).read()
+   pfn=re.sub("\n","",pfn)
+   print nanofile," -> ",pfn
+   if (os.getenv("GLIDECLIENT_Group","") != "overflow" and
+       os.getenv("GLIDECLIENT_Group","") != "overflow_conservative" and not
+       forceaaa ):
+      if not tested:
+         print "Testing file open"
+         testfile=ROOT.TFile.Open(pfn)
+         if testfile and testfile.IsOpen() :
+            print "Test OK"
+            nanofile=pfn
+            testfile.Close()
+         else:
+            if "root://cms-xrd-global.cern.ch/" not in nanofile:
+               nanofile = "root://cms-xrd-global.cern.ch/" + nanofile
+            forceaaa=True
+      else:
+         nanofile = pfn
+   else:
+       if "root://cms-xrd-global.cern.ch/" not in nanofile:
+          nanofile = "root://cms-xrd-global.cern.ch/" + nanofile
+   return nanofile
+
+args.infile = inputfile(args.infile)
+
 args = parser.parse_args()
 print "args = ", args
 isMC = args.isMC
@@ -106,31 +139,30 @@ preselection = "( (((((Muon_pt[0])>17)*((Muon_pt[1])>8))+(((Electron_pt[0])>23)*
 keepAndDrop = "keepAndDrop.txt"
 
 # for crab
-haddFileName = utils.GetOutputFilename(dataset, isMC)
-p = PostProcessor(
-   ".",
-   inputFiles(),
-   cut=preselection,
-   outputbranchsel=keepAndDrop,
-   modules=modulesToRun,
-   provenance=True,
-   fwkJobReport=True,
-   jsonInput=runsAndLumis(),
-   haddFileName=haddFileName,
-)
-# interactive testing
-# inputList = 'inputList_test2017MC.txt'
+# haddFileName = utils.GetOutputFilename(dataset, isMC)
 # p = PostProcessor(
-#     ".",
-#     utils.GetFileList(inputList),
-#     cut=preselection,
-#     outputbranchsel=keepAndDrop,
-#     branchsel=keepAndDrop,
-#     modules=modulesToRun,
-#     provenance=True,
-#     fwkJobReport=True,
-#     jsonInput=runsAndLumis(),
-#     haddFileName=haddFileName,
+#    ".",
+#    inputFiles(),
+#    cut=preselection,
+#    outputbranchsel=keepAndDrop,
+#    modules=modulesToRun,
+#    provenance=True,
+#    fwkJobReport=True,
+#    jsonInput=runsAndLumis(),
+#    haddFileName=haddFileName,
 # )
+# interactive testing
+inputList = 'inputTest.txt'
+p = PostProcessor(
+    ".", [args.infile],
+    cut=preselection,
+    outputbranchsel=keepAndDrop,
+    branchsel=keepAndDrop,
+    modules=modulesToRun,
+    provenance=True,
+    fwkJobReport=True,
+    jsonInput=runsAndLumis(),
+#    haddFileName=haddFileName,
+)
 
 p.run()
